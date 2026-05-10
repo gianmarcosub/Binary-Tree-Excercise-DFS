@@ -335,20 +335,27 @@ class AppAlberiDFS:
                 break
         self._apply_language()
 
-    def genera_albero(self, id_corrente=1, profondita=0):
+    def genera_albero(self, usati=None, profondita=0):
+        if usati is None:
+            usati = set()
         max_prof = self.var_profondita.get() - 1
         bilanciato = self.var_bilanciato.get()
 
         if profondita > max_prof:
-            return None, id_corrente
+            return None
         if not bilanciato and profondita > 0 and random.random() < 0.35:
-            return None, id_corrente
+            return None
 
-        nodo = Nodo(id_corrente)
-        id_corrente += 1
-        nodo.sinistra, id_corrente = self.genera_albero(id_corrente, profondita + 1)
-        nodo.destra, id_corrente = self.genera_albero(id_corrente, profondita + 1)
-        return nodo, id_corrente
+        disponibili = [v for v in range(1, 100) if v not in usati]
+        if not disponibili:
+            return None
+        valore = random.choice(disponibili)
+        usati.add(valore)
+
+        nodo = Nodo(valore)
+        nodo.sinistra = self.genera_albero(usati, profondita + 1)
+        nodo.destra = self.genera_albero(usati, profondita + 1)
+        return nodo
 
     def _layout(self, root):
         counter = [0]
@@ -417,13 +424,14 @@ class AppAlberiDFS:
         self.zoom_level = 1.0
 
         for _ in range(20):
-            self.albero, _ = self.genera_albero()
+            self.albero = self.genera_albero()
             if self.albero and self._count_nodes(self.albero) >= 3:
                 break
         else:
-            self.albero = Nodo(1)
-            self.albero.sinistra = Nodo(2)
-            self.albero.destra = Nodo(3)
+            valori = random.sample(range(1, 100), 3)
+            self.albero = Nodo(valori[0])
+            self.albero.sinistra = Nodo(valori[1])
+            self.albero.destra = Nodo(valori[2])
 
         width, height, _ = self._layout(self.albero)
         self._disegna(self.albero)
