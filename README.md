@@ -25,7 +25,7 @@ Nessuna dipendenza esterna oltre alla libreria standard.
 ## Avvio
 
 ```bash
-python array.py
+python main.py
 ```
 
 ## Utilizzo
@@ -48,8 +48,8 @@ python array.py
 ## Struttura del progetto
 
 ```
-algo/
-├── array.py        # Applicazione principale (UI + logica)
+/
+├── main.py        # Applicazione principale (UI + logica)
 └── README.md
 ```
 
