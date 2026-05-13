@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import random
 
 
 SORT_TABLE_TRANSLATIONS = {
@@ -141,12 +142,12 @@ WORST_OPTIONS = ["Θ(n²)", "Θ(n log₂ n)", "O(n²)", "O(n log₂ n)"]
 MEMORY_OPTIONS = ["Θ(1)", "O(n)", "O(log₂ n)"]
 
 COLUMNS_SPEC = [
+    ("in_place", "sort_table_col_inplace", None,           "yesno",   7),
+    ("stable",   "sort_table_col_stable",  None,           "yesno",   7),
     ("best",     "sort_table_col_best",    BEST_OPTIONS,   "value",  14),
     ("avg",      "sort_table_col_avg",     AVG_OPTIONS,    "value",  14),
     ("worst",    "sort_table_col_worst",   WORST_OPTIONS,  "value",  14),
     ("memory",   "sort_table_col_memory",  MEMORY_OPTIONS, "value",  11),
-    ("stable",   "sort_table_col_stable",  None,           "yesno",   7),
-    ("in_place", "sort_table_col_inplace", None,           "yesno",   7),
 ]
 
 ROW_BG_LIGHT = "#FFFFFF"
@@ -163,6 +164,7 @@ class SortingTableScreen(tk.Frame):
         self.header_labels = []
         self.name_labels = []
         self.answered = False
+        self.shuffled_data = random.sample(SORT_TABLE_DATA, len(SORT_TABLE_DATA))
         self._build_ui()
         self._apply_language()
 
@@ -233,7 +235,7 @@ class SortingTableScreen(tk.Frame):
             self.header_labels.append((lbl, key))
 
         # Data rows
-        for row_idx, row_data in enumerate(SORT_TABLE_DATA):
+        for row_idx, row_data in enumerate(self.shuffled_data):
             algo_name = row_data[0]
             grid_row = row_idx + 1
             row_bg = ROW_BG_LIGHT if grid_row % 2 == 1 else ROW_BG_DARK
@@ -352,7 +354,7 @@ class SortingTableScreen(tk.Frame):
         n_total = len(self.cells)
         for (row_idx, col_key), cell in self.cells.items():
             user_val = cell["var"].get()
-            raw_expected = SORT_TABLE_DATA[row_idx][col_index[col_key]]
+            raw_expected = self.shuffled_data[row_idx][col_index[col_key]]
             if cell["kind"] == "yesno":
                 expected = yes_str if raw_expected else no_str
             else:
