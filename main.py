@@ -5,6 +5,8 @@ import random
 from sorting_exercise import SortingScreen, SORT_TRANSLATIONS
 from bfs_exercise import BFSScreen, BFS_TRANSLATIONS
 from sorting_table_exercise import SortingTableScreen, SORT_TABLE_TRANSLATIONS
+from sort_table_row_exercise import SORT_TABLE_ROW_TRANSLATIONS
+from random_mix_exercise import RandomMixScreen, RANDOM_MIX_TRANSLATIONS
 
 
 TRANSLATIONS = {
@@ -443,6 +445,12 @@ for _lang, _kvs in BFS_TRANSLATIONS.items():
 for _lang, _kvs in SORT_TABLE_TRANSLATIONS.items():
     TRANSLATIONS[_lang].update(_kvs)
 
+for _lang, _kvs in SORT_TABLE_ROW_TRANSLATIONS.items():
+    TRANSLATIONS[_lang].update(_kvs)
+
+for _lang, _kvs in RANDOM_MIX_TRANSLATIONS.items():
+    TRANSLATIONS[_lang].update(_kvs)
+
 
 OPTIONS = ["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(n³)", "O(2ⁿ)"]
 
@@ -717,6 +725,9 @@ class MainController:
     def show_sort_table(self):
         self._swap(SortingTableScreen)
 
+    def show_random(self):
+        self._swap(RandomMixScreen)
+
     def set_language(self, lang_code):
         self.lang = lang_code
         self._update_title()
@@ -749,17 +760,18 @@ class MenuScreen(tk.Frame):
 
         tk.Label(
             self, text=self.controller.t("menu_title"),
-            font=("Arial", 26, "bold"), bg="#f0f0f0", fg="#222",
-        ).pack(pady=(50, 8))
+            font=("Arial", 24, "bold"), bg="#f0f0f0", fg="#222",
+        ).pack(pady=(20, 4))
         tk.Label(
             self, text=self.controller.t("menu_subtitle"),
-            font=("Arial", 12, "italic"), bg="#f0f0f0", fg="#666",
-        ).pack(pady=(0, 30))
+            font=("Arial", 11, "italic"), bg="#f0f0f0", fg="#666",
+        ).pack(pady=(0, 16))
 
         btn_frame = tk.Frame(self, bg="#f0f0f0")
         btn_frame.pack(pady=10)
 
         configs = [
+            ("menu_random", "#3F51B5", self.controller.show_random),
             ("menu_dfs", "#4CAF50", self.controller.show_dfs),
             ("menu_bfs", "#00BCD4", self.controller.show_bfs),
             ("menu_rb", "#E91E63", self.controller.show_rb),
@@ -770,10 +782,10 @@ class MenuScreen(tk.Frame):
         for key, color, cmd in configs:
             tk.Button(
                 btn_frame, text=self.controller.t(key), command=cmd,
-                bg=color, fg="white", font=("Arial", 13, "bold"),
-                width=34, height=3, relief=tk.RAISED, bd=3,
+                bg=color, fg="white", font=("Arial", 12, "bold"),
+                width=34, height=2, relief=tk.RAISED, bd=3,
                 activebackground=color, cursor="hand2", justify="center",
-            ).pack(pady=10)
+            ).pack(pady=5)
 
     def _on_lang(self, _e=None):
         chosen = self.var_lang.get()
