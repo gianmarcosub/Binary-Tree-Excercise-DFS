@@ -1,7 +1,7 @@
 import os
 
 
-STATS_FILE = r"C:\statistiche_algoritmi.txt"
+STATS_FILE = os.path.join(os.path.expanduser("~"), "Documents", "statistiche_algoritmi.txt")
 
 CATEGORIES = ["dfs", "bfs", "rb", "async", "sort", "sort_row", "sort_table"]
 
@@ -182,6 +182,7 @@ def _empty_stats():
 
 def create_file():
     try:
+        os.makedirs(os.path.dirname(STATS_FILE), exist_ok=True)
         if not os.path.isfile(STATS_FILE):
             save(_empty_stats())
         return True, None
