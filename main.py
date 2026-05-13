@@ -4,6 +4,7 @@ import random
 
 from sorting_exercise import SortingScreen, SORT_TRANSLATIONS
 from bfs_exercise import BFSScreen, BFS_TRANSLATIONS
+from sorting_table_exercise import SortingTableScreen, SORT_TABLE_TRANSLATIONS
 
 
 TRANSLATIONS = {
@@ -439,6 +440,9 @@ for _lang, _kvs in SORT_TRANSLATIONS.items():
 for _lang, _kvs in BFS_TRANSLATIONS.items():
     TRANSLATIONS[_lang].update(_kvs)
 
+for _lang, _kvs in SORT_TABLE_TRANSLATIONS.items():
+    TRANSLATIONS[_lang].update(_kvs)
+
 
 OPTIONS = ["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(n³)", "O(2ⁿ)"]
 
@@ -710,6 +714,9 @@ class MainController:
     def show_bfs(self):
         self._swap(BFSScreen)
 
+    def show_sort_table(self):
+        self._swap(SortingTableScreen)
+
     def set_language(self, lang_code):
         self.lang = lang_code
         self._update_title()
@@ -758,6 +765,7 @@ class MenuScreen(tk.Frame):
             ("menu_rb", "#E91E63", self.controller.show_rb),
             ("menu_async", "#9C27B0", self.controller.show_async),
             ("menu_sort", "#FF9800", self.controller.show_sort),
+            ("menu_sort_table", "#607D8B", self.controller.show_sort_table),
         ]
         for key, color, cmd in configs:
             tk.Button(
