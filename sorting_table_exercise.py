@@ -23,6 +23,9 @@ SORT_TABLE_TRANSLATIONS = {
         "sort_table_empty": "⚠ Compila tutte le caselle prima di verificare.",
         "sort_table_ok": "✓",
         "sort_table_ko": "✗ {ans}",
+        "sort_table_err_wrong": "❌  {algo} · {col}: corretta {ans}   (tu: {user})",
+        "sort_table_err_empty": "⊝  {algo} · {col}: corretta {ans}   (non risposto)",
+        "sort_table_summary_done": "{correct}/{total} corrette · {wrong} errate · {empty} non risposte",
     },
     "en": {
         "menu_sort_table": "Blank Sorting Table\nFill the whole complexity table",
@@ -43,6 +46,9 @@ SORT_TABLE_TRANSLATIONS = {
         "sort_table_empty": "⚠ Fill all cells before checking.",
         "sort_table_ok": "✓",
         "sort_table_ko": "✗ {ans}",
+        "sort_table_err_wrong": "❌  {algo} · {col}: correct {ans}   (you: {user})",
+        "sort_table_err_empty": "⊝  {algo} · {col}: correct {ans}   (not answered)",
+        "sort_table_summary_done": "{correct}/{total} correct · {wrong} wrong · {empty} unanswered",
     },
     "es": {
         "menu_sort_table": "Tabla Muda de Ordenación\nRellena toda la tabla de complejidad",
@@ -63,6 +69,9 @@ SORT_TABLE_TRANSLATIONS = {
         "sort_table_empty": "⚠ Rellena todas las casillas antes de comprobar.",
         "sort_table_ok": "✓",
         "sort_table_ko": "✗ {ans}",
+        "sort_table_err_wrong": "❌  {algo} · {col}: correcto {ans}   (tú: {user})",
+        "sort_table_err_empty": "⊝  {algo} · {col}: correcto {ans}   (sin respuesta)",
+        "sort_table_summary_done": "{correct}/{total} correctas · {wrong} erróneas · {empty} sin responder",
     },
     "fr": {
         "menu_sort_table": "Tableau Muet des Tris\nRemplis toute la table de complexité",
@@ -83,6 +92,9 @@ SORT_TABLE_TRANSLATIONS = {
         "sort_table_empty": "⚠ Remplis toutes les cases avant de vérifier.",
         "sort_table_ok": "✓",
         "sort_table_ko": "✗ {ans}",
+        "sort_table_err_wrong": "❌  {algo} · {col}: correct {ans}   (toi: {user})",
+        "sort_table_err_empty": "⊝  {algo} · {col}: correct {ans}   (sans réponse)",
+        "sort_table_summary_done": "{correct}/{total} correctes · {wrong} fausses · {empty} sans réponse",
     },
     "de": {
         "menu_sort_table": "Leere Sortier-Tabelle\nFülle die ganze Komplexitätstabelle aus",
@@ -103,6 +115,9 @@ SORT_TABLE_TRANSLATIONS = {
         "sort_table_empty": "⚠ Fülle alle Felder aus, bevor du prüfst.",
         "sort_table_ok": "✓",
         "sort_table_ko": "✗ {ans}",
+        "sort_table_err_wrong": "❌  {algo} · {col}: richtig {ans}   (du: {user})",
+        "sort_table_err_empty": "⊝  {algo} · {col}: richtig {ans}   (keine Antwort)",
+        "sort_table_summary_done": "{correct}/{total} richtig · {wrong} falsch · {empty} ohne Antwort",
     },
     "pt": {
         "menu_sort_table": "Tabela em Branco dos Ordenamentos\nPreencha a tabela de complexidade inteira",
@@ -123,6 +138,9 @@ SORT_TABLE_TRANSLATIONS = {
         "sort_table_empty": "⚠ Preencha todas as células antes de verificar.",
         "sort_table_ok": "✓",
         "sort_table_ko": "✗ {ans}",
+        "sort_table_err_wrong": "❌  {algo} · {col}: correta {ans}   (você: {user})",
+        "sort_table_err_empty": "⊝  {algo} · {col}: correta {ans}   (sem resposta)",
+        "sort_table_summary_done": "{correct}/{total} corretas · {wrong} erradas · {empty} sem resposta",
     },
 }
 
@@ -280,7 +298,24 @@ class SortingTableScreen(tk.Frame):
             bottom, text="", font=("Arial", 11, "bold"), bg="#f0f0f0",
             wraplength=1000, justify="center",
         )
-        self.lbl_feedback.pack(pady=8)
+        self.lbl_feedback.pack(pady=(8, 4))
+
+        self.errors_frame = tk.Frame(bottom, bg="#f0f0f0")
+        # Not packed by default — shown only when there are errors/missing
+
+        self.text_errors = tk.Text(
+            self.errors_frame, height=7, font=("Consolas", 10),
+            bg="#fafafa", fg="#333", wrap=tk.WORD, bd=1, relief=tk.SOLID,
+            padx=8, pady=6,
+        )
+        err_sb = tk.Scrollbar(
+            self.errors_frame, orient=tk.VERTICAL, command=self.text_errors.yview,
+        )
+        err_sb.pack(side=tk.RIGHT, fill=tk.Y)
+        self.text_errors.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.text_errors.configure(yscrollcommand=err_sb.set, state=tk.DISABLED)
+        self.text_errors.tag_configure("wrong", foreground="#C62828")
+        self.text_errors.tag_configure("empty", foreground="#FB8C00")
 
     def _apply_language(self):
         self.btn_back.config(text=self.t("back"))
@@ -324,6 +359,7 @@ class SortingTableScreen(tk.Frame):
         for cell in self.cells.values():
             cell["combobox"].config(state="readonly")
         self.lbl_feedback.config(text="")
+        self._clear_errors()
 
     def _reset_table(self):
         self.answered = False
@@ -334,49 +370,86 @@ class SortingTableScreen(tk.Frame):
             cell["status"].config(text="")
             cell["combobox"].config(state="readonly")
         self.btn_verify.config(state=tk.NORMAL)
+        self._clear_errors()
+
+    def _clear_errors(self):
+        self.errors_frame.pack_forget()
+        self.text_errors.configure(state=tk.NORMAL)
+        self.text_errors.delete("1.0", tk.END)
+        self.text_errors.configure(state=tk.DISABLED)
 
     def verifica(self):
         if self.answered:
             return
 
         placeholder = self.t("sort_table_pick")
-        for cell in self.cells.values():
-            val = cell["var"].get()
-            if val == placeholder or val == "":
-                self.lbl_feedback.config(text=self.t("sort_table_empty"), fg="#FF9800")
-                return
-
         yes_str = self.t("sort_yes")
         no_str = self.t("sort_no")
         col_index = {"best": 1, "avg": 2, "worst": 3, "memory": 4, "stable": 5, "in_place": 6}
+        col_label_keys = {c[0]: c[1] for c in COLUMNS_SPEC}
 
-        n_wrong = 0
+        n_correct = n_wrong = n_empty = 0
         n_total = len(self.cells)
-        for (row_idx, col_key), cell in self.cells.items():
-            user_val = cell["var"].get()
-            raw_expected = self.shuffled_data[row_idx][col_index[col_key]]
-            if cell["kind"] == "yesno":
-                expected = yes_str if raw_expected else no_str
-            else:
-                expected = raw_expected
-            if user_val == expected:
-                cell["status"].config(text=self.t("sort_table_ok"), fg="#2E7D32")
-            else:
-                cell["status"].config(
-                    text=self.t("sort_table_ko", ans=expected), fg="#C62828",
-                )
-                n_wrong += 1
+        error_lines = []  # list of (line_text, tag)
+
+        for row_idx in range(len(self.shuffled_data)):
+            algo_name = self.shuffled_data[row_idx][0]
+            for col_key, _label_key, _options, _kind, _w in COLUMNS_SPEC:
+                cell = self.cells[(row_idx, col_key)]
+                user_val = cell["var"].get()
+                raw_expected = self.shuffled_data[row_idx][col_index[col_key]]
+                if cell["kind"] == "yesno":
+                    expected = yes_str if raw_expected else no_str
+                else:
+                    expected = raw_expected
+                col_label = self.t(col_label_keys[col_key])
+
+                if user_val == placeholder or user_val == "":
+                    cell["status"].config(text="—", fg="#9E9E9E")
+                    n_empty += 1
+                    error_lines.append((
+                        self.t("sort_table_err_empty",
+                               algo=algo_name, col=col_label, ans=expected),
+                        "empty",
+                    ))
+                elif user_val == expected:
+                    cell["status"].config(text=self.t("sort_table_ok"), fg="#2E7D32")
+                    n_correct += 1
+                else:
+                    cell["status"].config(
+                        text=self.t("sort_table_ko", ans=expected), fg="#C62828",
+                    )
+                    n_wrong += 1
+                    error_lines.append((
+                        self.t("sort_table_err_wrong",
+                               algo=algo_name, col=col_label, ans=expected, user=user_val),
+                        "wrong",
+                    ))
 
         self.answered = True
         self.btn_verify.config(state=tk.DISABLED)
         for cell in self.cells.values():
             cell["combobox"].config(state=tk.DISABLED)
 
-        if n_wrong == 0:
+        if n_wrong == 0 and n_empty == 0:
             self.lbl_feedback.config(
                 text=self.t("sort_table_perfect", total=n_total), fg="#4CAF50",
             )
         else:
+            color = "#C62828" if n_wrong > 0 else "#FB8C00"
             self.lbl_feedback.config(
-                text=self.t("sort_table_partial", wrong=n_wrong, total=n_total), fg="#F44336",
+                text=self.t("sort_table_summary_done",
+                            correct=n_correct, wrong=n_wrong,
+                            empty=n_empty, total=n_total),
+                fg=color,
             )
+
+        if error_lines:
+            self.errors_frame.pack(fill=tk.X, padx=20, pady=(0, 6))
+            self.text_errors.configure(state=tk.NORMAL)
+            self.text_errors.delete("1.0", tk.END)
+            for line, tag in error_lines:
+                self.text_errors.insert(tk.END, line + "\n", tag)
+            self.text_errors.configure(state=tk.DISABLED)
+        else:
+            self.errors_frame.pack_forget()
