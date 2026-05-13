@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import random
 
+import stats_tracker
+
 from sorting_table_exercise import (
     SORT_TABLE_DATA, BEST_OPTIONS, AVG_OPTIONS, WORST_OPTIONS, MEMORY_OPTIONS,
     values_match,
@@ -289,6 +291,8 @@ class SortTableRowScreen(tk.Frame):
         self.btn_verify.config(state=tk.DISABLED)
         for cell in self.cells.values():
             cell["combobox"].config(state=tk.DISABLED)
+
+        stats_tracker.record("sort_row", n_wrong == 0 and n_empty == 0)
 
         if n_wrong == 0 and n_empty == 0:
             self.lbl_feedback.config(

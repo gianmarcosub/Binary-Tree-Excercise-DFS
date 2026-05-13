@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import random
 
+import stats_tracker
+
 
 SORT_TRANSLATIONS = {
     "it": {
@@ -680,6 +682,8 @@ class SortingScreen(tk.Frame):
         self.btn_verify.config(state=tk.DISABLED)
         for key in self.FIELD_KEYS:
             self.fields[key]["combobox"].config(state=tk.DISABLED)
+
+        stats_tracker.record("sort", n_wrong == 0)
 
         if n_wrong == 0:
             self.lbl_feedback.config(text=self.t("sort_all_correct"), fg="#4CAF50")

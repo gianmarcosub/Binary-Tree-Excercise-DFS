@@ -1,6 +1,8 @@
 import tkinter as tk
 import random
 
+import stats_tracker
+
 
 RANDOM_MIX_TRANSLATIONS = {
     "it": {
@@ -62,7 +64,12 @@ class RandomMixScreen(tk.Frame):
         keys = list(self._choices.keys())
         if self.last_key in keys and len(keys) > 1:
             keys = [k for k in keys if k != self.last_key]
-        chosen = random.choice(keys)
+
+        weights = stats_tracker.weights(keys)
+        if weights and any(w > 0 for w in weights):
+            chosen = random.choices(keys, weights=weights, k=1)[0]
+        else:
+            chosen = random.choice(keys)
         self.last_key = chosen
 
         if self.sub_screen is not None:

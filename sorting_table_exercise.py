@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import random
 
+import stats_tracker
+
 
 SORT_TABLE_TRANSLATIONS = {
     "it": {
@@ -449,6 +451,8 @@ class SortingTableScreen(tk.Frame):
         self.btn_verify.config(state=tk.DISABLED)
         for cell in self.cells.values():
             cell["combobox"].config(state=tk.DISABLED)
+
+        stats_tracker.record("sort_table", n_wrong == 0 and n_empty == 0)
 
         if n_wrong == 0 and n_empty == 0:
             self.lbl_feedback.config(

@@ -3,6 +3,8 @@ from tkinter import ttk
 from collections import deque
 import random
 
+import stats_tracker
+
 
 BFS_TRANSLATIONS = {
     "it": {
@@ -295,6 +297,7 @@ class BFSScreen(tk.Frame):
         self.entry_risposta.delete(0, tk.END)
         self.lbl_feedback.config(text="")
         self.zoom_level = 1.0
+        self.stats_recorded = False
 
         for _ in range(20):
             self.albero = self.genera_albero()
@@ -339,13 +342,17 @@ class BFSScreen(tk.Frame):
         except ValueError:
             self.lbl_feedback.config(text=self.t("format_error"), fg="#FF9800")
             return
-        if sequenza_utente == self.sequenza_corretta:
+        correct = sequenza_utente == self.sequenza_corretta
+        if correct:
             self.lbl_feedback.config(text=self.t("correct"), fg="#4CAF50")
         else:
             self.lbl_feedback.config(
                 text=self.t("wrong", user=sequenza_utente, correct=self.sequenza_corretta),
                 fg="#F44336",
             )
+        if not self.stats_recorded:
+            stats_tracker.record("bfs", correct)
+            self.stats_recorded = True
 
     def _zoom(self, factor):
         new_level = self.zoom_level * factor

@@ -7,6 +7,7 @@ from bfs_exercise import BFSScreen, BFS_TRANSLATIONS
 from sorting_table_exercise import SortingTableScreen, SORT_TABLE_TRANSLATIONS
 from sort_table_row_exercise import SORT_TABLE_ROW_TRANSLATIONS
 from random_mix_exercise import RandomMixScreen, RANDOM_MIX_TRANSLATIONS
+import stats_tracker
 
 
 TRANSLATIONS = {
@@ -451,6 +452,9 @@ for _lang, _kvs in SORT_TABLE_ROW_TRANSLATIONS.items():
 for _lang, _kvs in RANDOM_MIX_TRANSLATIONS.items():
     TRANSLATIONS[_lang].update(_kvs)
 
+for _lang, _kvs in stats_tracker.STATS_TRANSLATIONS.items():
+    TRANSLATIONS[_lang].update(_kvs)
+
 
 OPTIONS = ["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(n³)", "O(2ⁿ)"]
 
@@ -787,14 +791,154 @@ class MenuScreen(tk.Frame):
                 activebackground=color, cursor="hand2", justify="center",
             ).pack(pady=5)
 
+        self._build_stats_panel()
+
+    def _build_stats_panel(self):
+        panel = tk.Frame(self, bg="#f0f0f0")
+        panel.pack(pady=(12, 16))
+
+        if stats_tracker.is_enabled():
+            tk.Label(
+                panel, text=self.controller.t("stats_active"),
+                font=("Arial", 10, "bold"), bg="#f0f0f0", fg="#2E7D32",
+            ).pack(pady=(0, 4))
+            row = tk.Frame(panel, bg="#f0f0f0")
+            row.pack()
+            tk.Button(
+                row, text=self.controller.t("stats_view_btn"),
+                command=self._show_stats_window,
+                bg="#2E7D32", fg="white", font=("Arial", 10, "bold"),
+                padx=10, pady=4, cursor="hand2",
+            ).pack(side=tk.LEFT, padx=4)
+            tk.Button(
+                row, text=self.controller.t("stats_reset_btn"),
+                command=self._reset_stats,
+                bg="#B71C1C", fg="white", font=("Arial", 10, "bold"),
+                padx=10, pady=4, cursor="hand2",
+            ).pack(side=tk.LEFT, padx=4)
+            tk.Label(
+                panel,
+                text=self.controller.t("stats_path_label", path=stats_tracker.STATS_FILE),
+                font=("Arial", 8, "italic"), bg="#f0f0f0", fg="#888",
+            ).pack(pady=(4, 0))
+        else:
+            tk.Label(
+                panel, text=self.controller.t("stats_inactive"),
+                font=("Arial", 10, "italic"), bg="#f0f0f0", fg="#888",
+            ).pack(pady=(0, 4))
+            tk.Button(
+                panel, text=self.controller.t("stats_create_btn"),
+                command=self._create_stats_file,
+                bg="#2E7D32", fg="white", font=("Arial", 10, "bold"),
+                padx=10, pady=4, cursor="hand2",
+            ).pack()
+            tk.Label(
+                panel,
+                text=self.controller.t("stats_path_label", path=stats_tracker.STATS_FILE),
+                font=("Arial", 8, "italic"), bg="#f0f0f0", fg="#888",
+            ).pack(pady=(4, 0))
+
+    def _create_stats_file(self):
+        ok, err = stats_tracker.create_file()
+        if ok:
+            from tkinter import messagebox
+            messagebox.showinfo(
+                self.controller.t("stats_window_title"),
+                self.controller.t("stats_create_ok", path=stats_tracker.STATS_FILE),
+            )
+            self._rebuild()
+        else:
+            from tkinter import messagebox
+            messagebox.showerror(
+                self.controller.t("stats_window_title"),
+                self.controller.t("stats_create_err", err=err),
+            )
+
+    def _reset_stats(self):
+        from tkinter import messagebox
+        if messagebox.askyesno(
+            self.controller.t("stats_window_title"),
+            self.controller.t("stats_reset_confirm"),
+        ):
+            stats_tracker.reset()
+
+    def _show_stats_window(self):
+        win = tk.Toplevel(self)
+        win.title(self.controller.t("stats_window_title"))
+        win.configure(bg="#f0f0f0")
+        win.geometry("640x440")
+
+        stats = stats_tracker.load()
+        total_right = sum(stats[c]["right"] for c in stats_tracker.CATEGORIES)
+        total_wrong = sum(stats[c]["wrong"] for c in stats_tracker.CATEGORIES)
+        grand_total = total_right + total_wrong
+
+        tk.Label(
+            win, text=self.controller.t("stats_window_title"),
+            font=("Arial", 14, "bold"), bg="#f0f0f0", fg="#222",
+        ).pack(pady=(10, 4))
+        tk.Label(
+            win,
+            text=self.controller.t("stats_path_label", path=stats_tracker.STATS_FILE),
+            font=("Arial", 8, "italic"), bg="#f0f0f0", fg="#888",
+        ).pack(pady=(0, 8))
+
+        if grand_total == 0:
+            tk.Label(
+                win, text=self.controller.t("stats_no_data"),
+                font=("Arial", 11, "italic"), bg="#f0f0f0", fg="#666",
+            ).pack(pady=20)
+        else:
+            tree_frame = tk.Frame(win, bg="#f0f0f0")
+            tree_frame.pack(expand=True, fill=tk.BOTH, padx=20, pady=4)
+            cols = ("cat", "right", "wrong", "pct", "weight")
+            tv = ttk.Treeview(tree_frame, columns=cols, show="headings", height=10)
+            tv.heading("cat", text=self.controller.t("stats_header_cat"))
+            tv.heading("right", text=self.controller.t("stats_header_right"))
+            tv.heading("wrong", text=self.controller.t("stats_header_wrong"))
+            tv.heading("pct", text=self.controller.t("stats_header_pct"))
+            tv.heading("weight", text=self.controller.t("stats_header_weight"))
+            tv.column("cat", width=200, anchor="w")
+            for c in ("right", "wrong", "pct", "weight"):
+                tv.column(c, width=90, anchor="center")
+            tv.pack(expand=True, fill=tk.BOTH)
+            for cat in stats_tracker.CATEGORIES:
+                d = stats[cat]
+                total = d["right"] + d["wrong"]
+                pct = (d["wrong"] / total * 100) if total else 0.0
+                w = stats_tracker.weight_for(d)
+                tv.insert("", "end", values=(
+                    self.controller.t(f"cat_{cat}"),
+                    d["right"],
+                    d["wrong"],
+                    f"{pct:.0f}%" if total else "—",
+                    f"{w:.2f}",
+                ))
+            grand_pct = (total_wrong / grand_total * 100) if grand_total else 0.0
+            tv.insert("", "end", values=(
+                self.controller.t("stats_total_row"),
+                total_right, total_wrong,
+                f"{grand_pct:.0f}%", "",
+            ))
+
+        tk.Button(
+            win, text=self.controller.t("stats_close_btn"),
+            command=win.destroy,
+            bg="#757575", fg="white", font=("Arial", 10, "bold"),
+            padx=12, pady=4, cursor="hand2",
+        ).pack(pady=10)
+
+    def _rebuild(self):
+        for w in self.winfo_children():
+            w.destroy()
+        self._build()
+
     def _on_lang(self, _e=None):
         chosen = self.var_lang.get()
         for code, data in TRANSLATIONS.items():
             if data["lang_name"] == chosen:
                 self.controller.set_language(code)
-                for w in self.winfo_children():
-                    w.destroy()
-                self._build()
+                self._rebuild()
                 break
 
 
@@ -1033,6 +1177,7 @@ class DFSScreen(tk.Frame):
         self.entry_risposta.delete(0, tk.END)
         self.lbl_feedback.config(text="")
         self.zoom_level = 1.0
+        self.stats_recorded = False
 
         for _ in range(20):
             self.albero = self.genera_albero()
@@ -1085,13 +1230,17 @@ class DFSScreen(tk.Frame):
         except ValueError:
             self.lbl_feedback.config(text=self.t("format_error"), fg="#FF9800")
             return
-        if sequenza_utente == self.sequenza_corretta:
+        correct = sequenza_utente == self.sequenza_corretta
+        if correct:
             self.lbl_feedback.config(text=self.t("correct"), fg="#4CAF50")
         else:
             self.lbl_feedback.config(
                 text=self.t("wrong", user=sequenza_utente, correct=self.sequenza_corretta),
                 fg="#F44336",
             )
+        if not self.stats_recorded:
+            stats_tracker.record("dfs", correct)
+            self.stats_recorded = True
 
     def _zoom(self, factor):
         new_level = self.zoom_level * factor
@@ -1344,6 +1493,7 @@ class RBScreen(tk.Frame):
         self.btn_no.config(state=tk.DISABLED)
 
         correct = (user_says_valid == self.is_valid)
+        stats_tracker.record("rb", correct)
         reason_text = self.t(self.reason) if self.reason else ""
 
         if correct and self.is_valid:
@@ -1489,6 +1639,7 @@ class AsyncScreen(tk.Frame):
         if self.answered or self.current is None:
             return
         self.answered = True
+        stats_tracker.record("async", choice == self.current["answer"])
         for b in self.option_buttons:
             b.config(state=tk.DISABLED)
             if b.cget("text") == self.current["answer"]:
