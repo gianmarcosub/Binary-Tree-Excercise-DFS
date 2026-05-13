@@ -4,6 +4,7 @@ import random
 
 from sorting_table_exercise import (
     SORT_TABLE_DATA, BEST_OPTIONS, AVG_OPTIONS, WORST_OPTIONS, MEMORY_OPTIONS,
+    values_match,
 )
 
 
@@ -270,7 +271,7 @@ class SortTableRowScreen(tk.Frame):
                            algo=algo_name, col=col_label, ans=expected),
                     "empty",
                 ))
-            elif user_val == expected:
+            elif values_match(user_val, expected, cell["kind"]):
                 cell["status"].config(text=self.t("sort_table_ok"), fg="#2E7D32")
                 n_correct += 1
             else:

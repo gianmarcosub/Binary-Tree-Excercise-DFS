@@ -174,6 +174,25 @@ HEADER_BG = "#FFF8E1"
 GRID_BG = "#cccccc"
 
 
+def _strip_complexity_prefix(s):
+    s = s.strip()
+    if (s.startswith("Θ(") or s.startswith("O(")) and s.endswith(")"):
+        return s[s.index("(") + 1 : -1]
+    return s
+
+
+def values_match(user_val, expected, kind):
+    """Accept Θ(X) and O(X) interchangeably for value cells.
+
+    The algorithms in this table all have tight asymptotic bounds, so
+    writing O(X) when the canonical answer is Θ(X) — or vice versa — is
+    still mathematically correct (Θ(f) ⊂ O(f)).
+    """
+    if kind == "yesno":
+        return user_val == expected
+    return _strip_complexity_prefix(user_val) == _strip_complexity_prefix(expected)
+
+
 class SortingTableScreen(tk.Frame):
     def __init__(self, root, controller):
         super().__init__(root, bg="#f0f0f0")
@@ -412,7 +431,7 @@ class SortingTableScreen(tk.Frame):
                                algo=algo_name, col=col_label, ans=expected),
                         "empty",
                     ))
-                elif user_val == expected:
+                elif values_match(user_val, expected, cell["kind"]):
                     cell["status"].config(text=self.t("sort_table_ok"), fg="#2E7D32")
                     n_correct += 1
                 else:
