@@ -7,6 +7,8 @@ from bfs_exercise import BFSScreen, BFS_TRANSLATIONS
 from sorting_table_exercise import SortingTableScreen, SORT_TABLE_TRANSLATIONS
 from sort_table_row_exercise import SORT_TABLE_ROW_TRANSLATIONS
 from random_mix_exercise import RandomMixScreen, RANDOM_MIX_TRANSLATIONS
+from ai_exercise import AIExerciseScreen, AIConfigDialog
+import ai_config
 import stats_tracker
 
 
@@ -455,6 +457,9 @@ for _lang, _kvs in RANDOM_MIX_TRANSLATIONS.items():
 for _lang, _kvs in stats_tracker.STATS_TRANSLATIONS.items():
     TRANSLATIONS[_lang].update(_kvs)
 
+for _lang, _kvs in ai_config.AI_TRANSLATIONS.items():
+    TRANSLATIONS[_lang].update(_kvs)
+
 
 OPTIONS = ["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(n³)", "O(2ⁿ)"]
 
@@ -732,12 +737,28 @@ class MainController:
     def show_random(self):
         self._swap(RandomMixScreen)
 
+    def show_ai(self):
+        self._swap(AIExerciseScreen)
+
     def set_language(self, lang_code):
         self.lang = lang_code
         self._update_title()
 
     def language_options(self):
         return [(code, TRANSLATIONS[code]["lang_name"]) for code in TRANSLATIONS]
+
+    def lang_name(self, code):
+        return TRANSLATIONS[code]["lang_name"]
+
+    def lang_values(self):
+        return [TRANSLATIONS[k]["lang_name"] for k in TRANSLATIONS]
+
+    def set_language_by_name(self, name):
+        for code, data in TRANSLATIONS.items():
+            if data["lang_name"] == name:
+                self.set_language(code)
+                return code
+        return self.lang
 
 
 class MenuScreen(tk.Frame):
@@ -762,6 +783,13 @@ class MenuScreen(tk.Frame):
         cb.pack(side=tk.LEFT, padx=8)
         cb.bind("<<ComboboxSelected>>", self._on_lang)
 
+        tk.Button(
+            top, text=self.controller.t("ai_config_btn"),
+            command=self._open_ai_config,
+            bg="#455A64", fg="white", font=("Arial", 10, "bold"),
+            padx=10, pady=4, cursor="hand2",
+        ).pack(side=tk.RIGHT)
+
         tk.Label(
             self, text=self.controller.t("menu_title"),
             font=("Arial", 24, "bold"), bg="#f0f0f0", fg="#222",
@@ -782,6 +810,7 @@ class MenuScreen(tk.Frame):
             ("menu_async", "#9C27B0", self.controller.show_async),
             ("menu_sort", "#FF9800", self.controller.show_sort),
             ("menu_sort_table", "#607D8B", self.controller.show_sort_table),
+            ("menu_ai", "#009688", self.controller.show_ai),
         ]
         for key, color, cmd in configs:
             tk.Button(
@@ -837,6 +866,9 @@ class MenuScreen(tk.Frame):
                 text=self.controller.t("stats_path_label", path=stats_tracker.STATS_FILE),
                 font=("Arial", 8, "italic"), bg="#f0f0f0", fg="#888",
             ).pack(pady=(4, 0))
+
+    def _open_ai_config(self):
+        AIConfigDialog(self, self.controller, on_saved=self._rebuild)
 
     def _create_stats_file(self):
         ok, err = stats_tracker.create_file()

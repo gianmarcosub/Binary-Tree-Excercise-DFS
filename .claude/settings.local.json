@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(python -X utf8 -c ' *)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(python -m py_compile main.py ai_config.py ai_exercise.py stats_tracker.py)",
+      "Bash(python -c \"import main, ai_config, ai_exercise, stats_tracker; print\\('imports OK'\\); print\\('langs:', list\\(main.TRANSLATIONS.keys\\(\\)\\)\\); print\\('menu_ai it:', repr\\(main.TRANSLATIONS['it']['menu_ai']\\)\\); print\\('ai in CATEGORIES:', 'ai' in stats_tracker.CATEGORIES\\); print\\('models:', ai_config.MODELS\\)\")",
+      "Bash(python -c \"import main, ai_config, stats_tracker; print\\('imports OK'\\); print\\('langs:', list\\(main.TRANSLATIONS.keys\\(\\)\\)\\); print\\('menu_ai key present all langs:', all\\('menu_ai' in main.TRANSLATIONS[l] for l in main.TRANSLATIONS\\)\\); print\\('ai in CATEGORIES:', 'ai' in stats_tracker.CATEGORIES\\); print\\('cat_ai all langs:', all\\('cat_ai' in stats_tracker.STATS_TRANSLATIONS[l] for l in stats_tracker.STATS_TRANSLATIONS\\)\\); print\\('models:', ai_config.MODELS\\); print\\('configured:', ai_config.is_configured\\(\\)\\)\")",
+      "Bash(python -m py_compile ai_exercise.py main.py)",
+      "Bash(python -m py_compile ai_exercise.py)",
+      "Bash(python -c \"import main; print\\('full import OK'\\)\")"
     ]
   }
 }

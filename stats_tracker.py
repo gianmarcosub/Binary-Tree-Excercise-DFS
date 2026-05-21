@@ -3,7 +3,7 @@ import os
 
 STATS_FILE = os.path.join(os.path.expanduser("~"), "Documents", "statistiche_algoritmi.txt")
 
-CATEGORIES = ["dfs", "bfs", "rb", "async", "sort", "sort_row", "sort_table"]
+CATEGORIES = ["dfs", "bfs", "rb", "async", "sort", "sort_row", "sort_table", "ai"]
 
 
 STATS_TRANSLATIONS = {
@@ -33,6 +33,7 @@ STATS_TRANSLATIONS = {
         "cat_sort": "Ordinamento (codice)",
         "cat_sort_row": "Tabella riga singola",
         "cat_sort_table": "Tabella completa",
+        "cat_ai": "Codice AI (Gemini)",
     },
     "en": {
         "stats_active": "📊 Stats Mode active — weighted Random Mix",
@@ -60,6 +61,7 @@ STATS_TRANSLATIONS = {
         "cat_sort": "Sorting (code)",
         "cat_sort_row": "Single-row table",
         "cat_sort_table": "Full table",
+        "cat_ai": "AI code (Gemini)",
     },
     "es": {
         "stats_active": "📊 Modo Estadísticas activo — Random Mix ponderado",
@@ -87,6 +89,7 @@ STATS_TRANSLATIONS = {
         "cat_sort": "Ordenamiento (código)",
         "cat_sort_row": "Tabla fila única",
         "cat_sort_table": "Tabla completa",
+        "cat_ai": "Código IA (Gemini)",
     },
     "fr": {
         "stats_active": "📊 Mode Statistiques actif — Random Mix pondéré",
@@ -114,6 +117,7 @@ STATS_TRANSLATIONS = {
         "cat_sort": "Tri (code)",
         "cat_sort_row": "Tableau une ligne",
         "cat_sort_table": "Tableau complet",
+        "cat_ai": "Code IA (Gemini)",
     },
     "de": {
         "stats_active": "📊 Statistik-Modus aktiv — gewichtetes Random Mix",
@@ -141,6 +145,7 @@ STATS_TRANSLATIONS = {
         "cat_sort": "Sortierung (Code)",
         "cat_sort_row": "Tabelle Einzelzeile",
         "cat_sort_table": "Vollständige Tabelle",
+        "cat_ai": "KI-Code (Gemini)",
     },
     "pt": {
         "stats_active": "📊 Modo Estatísticas ativo — Random Mix ponderado",
@@ -168,6 +173,7 @@ STATS_TRANSLATIONS = {
         "cat_sort": "Ordenação (código)",
         "cat_sort_row": "Tabela linha única",
         "cat_sort_table": "Tabela completa",
+        "cat_ai": "Código IA (Gemini)",
     },
 }
 
