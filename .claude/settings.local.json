@@ -8,7 +8,8 @@
       "Bash(python -c \"import main, ai_config, stats_tracker; print\\('imports OK'\\); print\\('langs:', list\\(main.TRANSLATIONS.keys\\(\\)\\)\\); print\\('menu_ai key present all langs:', all\\('menu_ai' in main.TRANSLATIONS[l] for l in main.TRANSLATIONS\\)\\); print\\('ai in CATEGORIES:', 'ai' in stats_tracker.CATEGORIES\\); print\\('cat_ai all langs:', all\\('cat_ai' in stats_tracker.STATS_TRANSLATIONS[l] for l in stats_tracker.STATS_TRANSLATIONS\\)\\); print\\('models:', ai_config.MODELS\\); print\\('configured:', ai_config.is_configured\\(\\)\\)\")",
       "Bash(python -m py_compile ai_exercise.py main.py)",
       "Bash(python -m py_compile ai_exercise.py)",
-      "Bash(python -c \"import main; print\\('full import OK'\\)\")"
+      "Bash(python -c \"import main; print\\('full import OK'\\)\")",
+      "Bash(python -m py_compile graph_exercise.py main.py stats_tracker.py)"
     ]
   }
 }

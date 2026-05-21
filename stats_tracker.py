@@ -3,7 +3,10 @@ import os
 
 STATS_FILE = os.path.join(os.path.expanduser("~"), "Documents", "statistiche_algoritmi.txt")
 
-CATEGORIES = ["dfs", "bfs", "rb", "async", "sort", "sort_row", "sort_table", "ai"]
+CATEGORIES = [
+    "dfs", "bfs", "rb", "async", "sort", "sort_row", "sort_table", "ai",
+    "dijkstra", "bellman", "kosaraju", "erdos",
+]
 
 
 STATS_TRANSLATIONS = {

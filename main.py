@@ -8,6 +8,7 @@ from sorting_table_exercise import SortingTableScreen, SORT_TABLE_TRANSLATIONS
 from sort_table_row_exercise import SORT_TABLE_ROW_TRANSLATIONS
 from random_mix_exercise import RandomMixScreen, RANDOM_MIX_TRANSLATIONS
 from ai_exercise import AIExerciseScreen, AIConfigDialog
+from graph_exercise import GraphMenuScreen, GRAPH_TRANSLATIONS
 import ai_config
 import stats_tracker
 
@@ -454,6 +455,9 @@ for _lang, _kvs in SORT_TABLE_ROW_TRANSLATIONS.items():
 for _lang, _kvs in RANDOM_MIX_TRANSLATIONS.items():
     TRANSLATIONS[_lang].update(_kvs)
 
+for _lang, _kvs in GRAPH_TRANSLATIONS.items():
+    TRANSLATIONS[_lang].update(_kvs)
+
 for _lang, _kvs in stats_tracker.STATS_TRANSLATIONS.items():
     TRANSLATIONS[_lang].update(_kvs)
 
@@ -740,6 +744,9 @@ class MainController:
     def show_ai(self):
         self._swap(AIExerciseScreen)
 
+    def show_graph(self):
+        self._swap(GraphMenuScreen)
+
     def set_language(self, lang_code):
         self.lang = lang_code
         self._update_title()
@@ -806,6 +813,7 @@ class MenuScreen(tk.Frame):
             ("menu_random", "#3F51B5", self.controller.show_random),
             ("menu_dfs", "#4CAF50", self.controller.show_dfs),
             ("menu_bfs", "#00BCD4", self.controller.show_bfs),
+            ("menu_graph", "#1565C0", self.controller.show_graph),
             ("menu_rb", "#E91E63", self.controller.show_rb),
             ("menu_async", "#9C27B0", self.controller.show_async),
             ("menu_sort", "#FF9800", self.controller.show_sort),
